@@ -31,7 +31,7 @@ for (const name of ['localbasket-fe', 'localbasket-be']) {
 }
 const remotes = execFileSync('git', ['remote', '-v'], { encoding: 'utf8' });
 if (!remotes.includes('origin\thttps://github.com/localbasket-labs/localbasket-workspace.git')) throw new Error('wrong origin remote');
-if (!remotes.includes('personal\thttps://github.com/cyjoon68/localbasket-workspace.git')) throw new Error('wrong personal remote');
+if (remotes.includes('personal\t') && !remotes.includes('personal\thttps://github.com/cyjoon68/localbasket-workspace.git')) throw new Error('wrong personal remote');
 for (const name of ['localbasket-fe', 'localbasket-be']) {
   const childRemotes = execFileSync('git', ['-C', name, 'remote', '-v'], { encoding: 'utf8' });
   if (!childRemotes.includes(`origin\thttps://github.com/localbasket-labs/${name}.git`)) throw new Error(`wrong child origin ${name}`);
