@@ -1,8 +1,8 @@
-[submodule "apps/web"]
-	path = apps/web
+[submodule "localbasket-fe"]
+	path = localbasket-fe
 	url = https://github.com/localbasket-labs/localbasket-fe.git
 	branch = develop
-[submodule "services/api"]
-	path = services/api
+[submodule "localbasket-be"]
+	path = localbasket-be
 	url = https://github.com/localbasket-labs/localbasket-be.git
 	branch = develop
