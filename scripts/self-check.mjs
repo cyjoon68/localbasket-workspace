@@ -2,6 +2,17 @@ import { existsSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
 const project = 'localbasket';
+const normalizeRemote = (value) => value
+  .replace(/^https:\/\/[^@]+@github\.com\//, 'https://github.com/')
+  .replace(/\.git$/, '');
+const expectRemote = (remote, expected) => {
+  const actual = normalizeRemote(execFileSync('git', ['remote', 'get-url', remote], { encoding: 'utf8' }).trim());
+  if (actual !== expected) throw new Error(`wrong ${remote} remote`);
+};
+const expectChildOrigin = (name, expected) => {
+  const actual = normalizeRemote(execFileSync('git', ['-C', name, 'remote', 'get-url', 'origin'], { encoding: 'utf8' }).trim());
+  if (actual !== expected) throw new Error(`wrong child origin ${name}`);
+};
 const required = [
   '.gitmodules',
   '.github/workflows/ci.yml',
@@ -29,12 +40,11 @@ for (const name of ['localbasket-fe', 'localbasket-be']) {
   if (!modules.includes(`url = https://github.com/localbasket-labs/${name}.git`)) throw new Error(`wrong submodule url ${name}`);
   if (!modules.includes('branch = develop')) throw new Error(`wrong submodule branch ${name}`);
 }
-const remotes = execFileSync('git', ['remote', '-v'], { encoding: 'utf8' });
-if (!remotes.includes('origin\thttps://github.com/localbasket-labs/localbasket-workspace.git')) throw new Error('wrong origin remote');
-if (remotes.includes('personal\t') && !remotes.includes('personal\thttps://github.com/cyjoon68/localbasket-workspace.git')) throw new Error('wrong personal remote');
+expectRemote('origin', 'https://github.com/localbasket-labs/localbasket-workspace');
+const remotes = execFileSync('git', ['remote'], { encoding: 'utf8' });
+if (remotes.split('\n').includes('personal')) expectRemote('personal', 'https://github.com/cyjoon68/localbasket-workspace');
 for (const name of ['localbasket-fe', 'localbasket-be']) {
-  const childRemotes = execFileSync('git', ['-C', name, 'remote', '-v'], { encoding: 'utf8' });
-  if (!childRemotes.includes(`origin\thttps://github.com/localbasket-labs/${name}.git`)) throw new Error(`wrong child origin ${name}`);
+  expectChildOrigin(name, `https://github.com/localbasket-labs/${name}`);
 }
 
 const openapi = readFileSync(`${project}-be/openapi.yaml`, 'utf8');
